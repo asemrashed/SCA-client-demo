@@ -1,0 +1,159 @@
+import { createApi } from '@reduxjs/toolkit/query/react'
+import type {
+  AdminPaymentSummary,
+  CreateManualPaymentInput,
+  EnrollmentPaymentHistory,
+  ListMonthlyPaymentsParams,
+  MonthlyPaymentRecord,
+  PaymentAccessResult,
+  ReviewMonthlyPaymentInput,
+  SetPaymentAccessInput,
+  UnpaidStudentRecord,
+  UpdateManualPaymentInput,
+} from '@/types/api'
+import { baseQueryWithReauth } from '@/lib/apiClient'
+
+export const monthlyPaymentApi = createApi({
+  reducerPath: 'monthlyPaymentApi',
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['MonthlyPayment', 'EnrollmentPaymentHistory', 'PaymentSummary'],
+  endpoints: (builder) => ({
+    getEnrollmentPaymentHistory: builder.query<
+      { data: EnrollmentPaymentHistory },
+      string
+    >({
+      query: (enrollmentId) => `/me/enrollments/${enrollmentId}/payment-history`,
+      providesTags: (_r, _e, enrollmentId) => [
+        { type: 'EnrollmentPaymentHistory', id: enrollmentId },
+      ],
+    }),
+    requestMonthlyPayment: builder.mutation<
+      { data: { payment: MonthlyPaymentRecord; whatsappUrl: string } },
+      string
+    >({
+      query: (enrollmentId) => ({
+        url: `/me/enrollments/${enrollmentId}/monthly-payments`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_r, _e, enrollmentId) => [
+        { type: 'EnrollmentPaymentHistory', id: enrollmentId },
+        { type: 'MonthlyPayment', id: 'LIST' },
+      ],
+    }),
+    getAdminEnrollmentPaymentHistory: builder.query<
+      { data: EnrollmentPaymentHistory },
+      string
+    >({
+      query: (enrollmentId) => `/admin/monthly-payments/enrollments/${enrollmentId}/payment-history`,
+      providesTags: (_r, _e, enrollmentId) => [
+        { type: 'EnrollmentPaymentHistory', id: enrollmentId },
+      ],
+    }),
+    createManualPayment: builder.mutation<
+      { data: MonthlyPaymentRecord },
+      CreateManualPaymentInput
+    >({
+      query: (body) => ({
+        url: '/admin/monthly-payments',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (result) => [
+        { type: 'MonthlyPayment', id: 'LIST' },
+        { type: 'MonthlyPayment', id: 'UNPAID' },
+        { type: 'PaymentSummary', id: 'SUMMARY' },
+        ...(result
+          ? [{ type: 'EnrollmentPaymentHistory' as const, id: result.data.enrollment.id }]
+          : []),
+      ],
+    }),
+    updateManualPayment: builder.mutation<
+      { data: MonthlyPaymentRecord },
+      { id: string; body: UpdateManualPaymentInput }
+    >({
+      query: ({ id, body }) => ({
+        url: `/admin/monthly-payments/${id}/edit`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (result) => [
+        { type: 'MonthlyPayment', id: 'LIST' },
+        { type: 'MonthlyPayment', id: 'UNPAID' },
+        { type: 'PaymentSummary', id: 'SUMMARY' },
+        ...(result
+          ? [{ type: 'EnrollmentPaymentHistory' as const, id: result.data.enrollment.id }]
+          : []),
+      ],
+    }),
+    getAdminPaymentSummary: builder.query<{ data: AdminPaymentSummary }, void>({
+      query: () => '/admin/monthly-payments/summary',
+      providesTags: [{ type: 'PaymentSummary', id: 'SUMMARY' }],
+    }),
+    listAdminMonthlyPayments: builder.query<
+      { data: MonthlyPaymentRecord[]; meta: { total: number; page: number; pageSize: number } },
+      ListMonthlyPaymentsParams | void
+    >({
+      query: (params) => ({
+        url: '/admin/monthly-payments',
+        params: params ?? {},
+      }),
+      providesTags: [{ type: 'MonthlyPayment', id: 'LIST' }],
+    }),
+    listUnpaidStudents: builder.query<
+      { data: UnpaidStudentRecord[]; meta: { total: number; page: number; pageSize: number } },
+      ListMonthlyPaymentsParams | void
+    >({
+      query: (params) => ({
+        url: '/admin/monthly-payments/unpaid-students',
+        params: params ?? {},
+      }),
+      providesTags: [{ type: 'MonthlyPayment', id: 'UNPAID' }],
+    }),
+    reviewMonthlyPayment: builder.mutation<
+      { data: MonthlyPaymentRecord },
+      { id: string; body: ReviewMonthlyPaymentInput }
+    >({
+      query: ({ id, body }) => ({
+        url: `/admin/monthly-payments/${id}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (result) => [
+        { type: 'MonthlyPayment', id: 'LIST' },
+        { type: 'MonthlyPayment', id: 'UNPAID' },
+        { type: 'PaymentSummary', id: 'SUMMARY' },
+        ...(result
+          ? [{ type: 'EnrollmentPaymentHistory' as const, id: result.data.enrollment.id }]
+          : []),
+      ],
+    }),
+    setPaymentAccess: builder.mutation<
+      { data: PaymentAccessResult },
+      { enrollmentId: string; body: SetPaymentAccessInput }
+    >({
+      query: ({ enrollmentId, body }) => ({
+        url: `/admin/monthly-payments/enrollments/${enrollmentId}/access`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (_r, _e, { enrollmentId }) => [
+        { type: 'MonthlyPayment', id: 'UNPAID' },
+        { type: 'EnrollmentPaymentHistory', id: enrollmentId },
+      ],
+    }),
+  }),
+})
+
+export const {
+  useGetEnrollmentPaymentHistoryQuery,
+  useGetAdminEnrollmentPaymentHistoryQuery,
+  useRequestMonthlyPaymentMutation,
+  useCreateManualPaymentMutation,
+  useUpdateManualPaymentMutation,
+  useGetAdminPaymentSummaryQuery,
+  useListAdminMonthlyPaymentsQuery,
+  useListUnpaidStudentsQuery,
+  useLazyListUnpaidStudentsQuery,
+  useReviewMonthlyPaymentMutation,
+  useSetPaymentAccessMutation,
+} = monthlyPaymentApi

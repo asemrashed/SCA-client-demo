@@ -1,0 +1,135 @@
+"use client"
+
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowRight, Play, BookOpen, Pencil, GraduationCap, Rocket } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { LIVE_COURSE_CATALOG_HREF } from "@/lib/product-vocabulary"
+import { MARKETING_NAV_BLEED } from "@/lib/marketing-layout"
+import { motion } from "framer-motion"
+import { BRAND_SUBTAGLINE } from "@/lib/brand"
+
+const floatingIcons = [
+  { Icon: BookOpen, className: "left-[8%] top-[22%] h-10 w-10 md:h-12 md:w-12" },
+  { Icon: Pencil, className: "right-[12%] top-[18%] h-9 w-9 md:h-11 md:w-11" },
+  { Icon: GraduationCap, className: "left-[15%] bottom-[32%] h-8 w-8 md:h-10 md:w-10" },
+  { Icon: Rocket, className: "right-[18%] bottom-[36%] h-9 w-9 md:h-11 md:w-11" },
+]
+
+export function HeroSection() {
+  return (
+    <section className={cn("relative text-white flex flex-col min-h-[95dvh] md:min-h-[80dvh] lg:min-h-[70dvh] xl:min-h-[90dvh]", MARKETING_NAV_BLEED)}>
+      {/* Background image — object-top keeps torn bottom edge in view */}
+      <div className="absolute inset-0 -bottom-8 md:-bottom-22 -top-20">
+        <Image
+          src="/HeroImage.png"
+          alt=""
+          fill
+          className="object-cover object-top scale-y-110 md:scale-y-90"
+          priority
+          aria-hidden
+        />
+      </div>
+
+      {/* Non-filled decorative icons */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {floatingIcons.map(({ Icon, className }, i) => (
+          <Icon
+            key={i}
+            className={`absolute stroke-[1.5] text-white/25 ${className}`}
+            fill="none"
+          />
+        ))}
+      </div>
+
+      {/* Content — extra bottom padding reveals the torn paper shape */}
+      <div className="container relative z-10 mx-auto px-4 pb-20 pt-36 mt-20 md:mt-0 md:pt-40 flex-1 flex flex-col lg:pb-26 lg:pt-48">
+        <div className="my-auto mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            className="min-w-0 text-center lg:pl-6 lg:text-left xl:pl-10"
+          >
+            <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]">
+              {BRAND_SUBTAGLINE}
+            </h1>
+
+            <p className="mx-auto mb-8 max-w-lg text-pretty text-base text-white/80 md:text-lg lg:mx-0">
+              Empowering BBA & MBA Students with Skills for Academic and Professional Success.
+            </p>
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
+              <Button
+                size="lg"
+                className="rounded-full bg-primary px-8 text-base text-primary-foreground hover:bg-primary/90"
+                asChild
+              >
+                <Link href={LIVE_COURSE_CATALOG_HREF}>
+                  Get Started Now
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full border-white/30 bg-transparent px-8 text-base text-white hover:bg-white/10"
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Watch Video
+              </Button>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative flex justify-center"
+          >
+            <div className="relative">
+              <div className="relative flex h-72 w-72 items-center justify-center rounded-full bg-primary/30 md:h-80 md:w-80 lg:h-96 lg:w-96">
+                <div className="relative h-[88%] w-[88%] overflow-hidden rounded-full border-4 border-primary/50">
+                  <Image
+                    src="/images/hero.jpeg"
+                    alt="Your trusted partner for academic success"
+                    fill
+                    className="object-cover object-top"
+                    priority
+                  />
+                </div>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-2xl bg-white/95 px-5 py-3 shadow-xl backdrop-blur-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-2">
+                    {[
+                      "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=40&h=40&fit=crop&crop=face",
+                      "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=40&h=40&fit=crop&crop=face",
+                      "https://images.unsplash.com/photo-1615109398623-88346a601842?w=40&h=40&fit=crop&crop=face",
+                      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=40&h=40&fit=crop&crop=face",
+                    ].map((src, i) => (
+                      <div
+                        key={i}
+                        className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-white"
+                      >
+                        <Image src={src} alt="" fill className="object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold text-foreground">15k+ Learners</span>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}

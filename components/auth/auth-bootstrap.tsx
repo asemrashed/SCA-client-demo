@@ -1,0 +1,48 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { useDispatch } from 'react-redux'
+import { setCredentials, clearCredentials, setAuthReady } from '@/features/auth/authSlice'
+import { clearSessionCookie, hasRememberCookie, hasSessionCookie, setSessionCookie } from '@/lib/auth-session'
+import { markAuthReady } from '@/lib/auth-ready'
+import { bootstrapRefreshSession } from '@/lib/apiClient'
+import type { AppDispatch } from '@/store'
+
+export function AuthBootstrap() {
+  const dispatch = useDispatch<AppDispatch>()
+  const bootstrapped = useRef(false)
+
+  useEffect(() => {
+    if (bootstrapped.current) return
+    bootstrapped.current = true
+
+    const finish = () => {
+      dispatch(setAuthReady())
+      markAuthReady()
+    }
+
+    if (!hasSessionCookie()) {
+      finish()
+      return
+    }
+
+    bootstrapRefreshSession()
+      .then((result) => {
+        if (result.status === 'ok') {
+          setSessionCookie(result.data.user.role, { remember: hasRememberCookie() })
+          dispatch(
+            setCredentials({
+              accessToken: result.data.accessToken,
+              user: result.data.user,
+            }),
+          )
+        } else if (result.status === 'unauthorized') {
+          dispatch(clearCredentials())
+          clearSessionCookie()
+        }
+      })
+      .finally(finish)
+  }, [dispatch])
+
+  return null
+}

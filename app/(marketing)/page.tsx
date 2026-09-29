@@ -1,0 +1,24 @@
+import { HeroSection } from "@/components/home/hero-section"
+import { AboutSection } from "@/components/home/about-section"
+import { LiveCoursesSection } from "@/components/home/live-courses-section"
+import { LiveBatchesSection } from "@/components/home/live-batches-section"
+import { RecordedCoursesSection } from "@/components/home/recorded-courses-section"
+import { HomeTestimonialsSection } from "@/components/home/home-testimonials-section"
+import DownloadApp from "@/components/DownloadApp"
+
+export default function HomePage() {
+  return (
+    <>
+      <HeroSection />
+
+      <main>
+        <AboutSection />
+        <LiveCoursesSection />
+        <LiveBatchesSection />
+        <RecordedCoursesSection />
+        <HomeTestimonialsSection />
+        <DownloadApp />
+      </main>
+    </>
+  )
+}
